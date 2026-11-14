@@ -28,14 +28,14 @@ def download_once(url: str) -> tuple[int, float]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Измерить скорость скачивания за 10 последовательных HTTP-запросов."
+        description="Measure download speed using 10 sequential HTTP requests."
     )
-    parser.add_argument("url", help="Адрес файла или страницы, начинающийся с http:// или https://")
+    parser.add_argument("url", help="Full URL of a file or page (http:// or https://)")
     args = parser.parse_args()
 
     parsed = urlparse(args.url)
     if parsed.scheme not in ("http", "https") or not parsed.netloc:
-        parser.error("укажите полный HTTP- или HTTPS-адрес")
+        parser.error("provide a full HTTP or HTTPS URL")
 
     total_bytes = 0
     total_seconds = 0.0
@@ -45,20 +45,20 @@ def main() -> int:
             size, elapsed = download_once(args.url)
             total_bytes += size
             total_seconds += elapsed
-            print(f"Запрос {number:2}/{REQUEST_COUNT}: {size:,} байт, {elapsed:.3f} с")
+            print(f"Request {number:2}/{REQUEST_COUNT}: {size:,} bytes, {elapsed:.3f} s")
     except (HTTPError, URLError, TimeoutError, OSError, ValueError, HTTPException) as exc:
-        print(f"Ошибка при запросе {number}: {exc}")
+        print(f"Error on request {number}: {exc}")
         return 1
 
     if total_seconds <= 0:
-        print("Не удалось измерить время запросов.")
+        print("Could not measure request duration.")
         return 1
 
     average_seconds = total_seconds / REQUEST_COUNT
     speed_mbps = total_bytes * 8 / total_seconds / 1_000_000
-    print(f"\nСреднее время запроса: {average_seconds:.3f} с")
-    print(f"Объём скачанных данных: {total_bytes:,} байт")
-    print(f"Средняя скорость скачивания: {speed_mbps:.2f} Мбит/с")
+    print(f"\nAverage request time: {average_seconds:.3f} s")
+    print(f"Total downloaded: {total_bytes:,} bytes")
+    print(f"Average download speed: {speed_mbps:.2f} Mbit/s")
     return 0
 
 
